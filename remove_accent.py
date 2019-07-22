@@ -75,7 +75,8 @@ def get_rate_no_meaning_word_in_domain(s):
 
 if __name__ == '__main__':
     # process('dict/Viet74K.txt')
-    result_dict = {**get_word_dict('dict/removed_accent_words.txt'), **get_word_dict('dict/words.txt')}
+    result_dict = {**get_word_dict('dict/Viet74K.txt'), **get_word_dict('dict/removed_accent_words.txt'),
+                   **get_word_dict('dict/words.txt')}
 
     domains = select_domain_objects(contain_crawled_urls=False)
 
@@ -92,5 +93,3 @@ if __name__ == '__main__':
         f.close()
 
     update_meaning_word_rate(domain_meaning_word_rate)
-
-

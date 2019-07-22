@@ -53,7 +53,7 @@ CRITERIA_TYPE = {
     'pagerank': 'benefit',
     'ssl_grade': 'benefit',
     'meaning_word_rate': 'benefit',
-    'no_sub_domains': 'benefit',
+    'no_sub_domains': 'cost',
     'domain_length': 'cost'
 }
 

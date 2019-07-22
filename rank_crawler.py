@@ -3,8 +3,8 @@ import json
 import time
 from lxml import etree
 from twisted.internet import reactor, defer
-from urllib.parse import urlencode
-import datetime
+import idna
+import re
 
 from utils import get_domain_age_request_url, get_domain_popularity_request_url, get_url_with_scheme, get_ssl_info_url, \
     fix_url, get_domain
@@ -207,10 +207,11 @@ class ParsingDomain(Spider):
     def start_requests(self):
         print(len(self.domains))
         for domain in self.domains:
+            fixed_domain = re.sub(f":\d+", "", domain.domain_name)
             yield Request(url="http://192.168.1.240:8089/tagger/v1/character", method="POST",
                           headers={'Content-Type': 'application/json',
                                    'Authorization': "Basic YWRmaWxleDphZGZpbGV4QDIwMTk="},
-                          body=f'{{"text": "{domain.domain_name}"}}',
+                          body=f'{{"text": "{idna.decode(fixed_domain)}"}}',
                           callback=self.parse,
                           meta={'domain': domain.domain_name},
                           dont_filter=True)

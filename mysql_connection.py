@@ -4,9 +4,12 @@ import os
 import json
 import time
 import datetime
+import idna
+import re
 
 from domain_class import Domain
 from settings import DB
+from utils import get_no_sub_domains, get_supplied_domain
 
 
 def get_connection(host, user, password, db):
@@ -23,8 +26,8 @@ def init_database():
     connection = get_connection(DB['host'], DB['user'], DB['password'], DB['db'])
     domains = get_domain_list('domain_crawled_urls')
 
-    insert_domains(connection, domains)
-    insert_urls(connection, domains)
+    # insert_domains(connection, domains)
+    # insert_urls(connection, domains)
     insert_domain_to_domain(connection)
 
 
@@ -52,7 +55,10 @@ def insert_domain_to_domain(connection):
         with open('processed_data/domain_out_domains.jsonl', mode='r') as f:
             for line in f:
                 obj = json.loads(line)
-                domain_id = domain_indices[obj['domain']]
+                domain_id = domain_indices.get(obj['domain'])
+                if not domain_id:
+                    continue
+
                 out_domain_ids = [domain_indices[out_domain] for out_domain in obj['out_domains'] if
                                   domain_indices.get(out_domain) is not None]
                 cursor.executemany(insert_domain_to_domain_sql, [
@@ -79,22 +85,30 @@ def insert_urls(connection, domains):
 
 def get_domain_list(data_folder):
     domains = []
+    supplied_domains = set()
     i = 1
     for file_name in os.listdir(data_folder):
         with open(f"{data_folder}/{file_name}", mode='r', encoding='utf8') as f:
             category = json.load(f)
             for domain_name, urls in category.items():
-                domains.append(Domain(domain_name=domain_name,
-                                      first_time_crawl=time.time(),
-                                      last_time_updated=time.time(),
-                                      domain_age=0,
-                                      requested_urls=urls,
-                                      no_requested_requests=len(urls),
-                                      domain_id=i,
-                                      no_sub_domains=domain_name.count('.') - 1,
-                                      domain_length=len(domain_name),
-                                      ))
-                i += 1
+                if re.match(r".*(:\d*|facebook.com|google.com).*", domain_name):
+                    continue
+
+                supplied_domain = get_supplied_domain(domain_name)
+
+                if supplied_domain not in supplied_domains:
+                    supplied_domains.add(supplied_domain)
+                    domains.append(Domain(domain_name=domain_name,
+                                          first_time_crawl=time.time(),
+                                          last_time_updated=time.time(),
+                                          domain_age=0,
+                                          requested_urls=urls,
+                                          no_requested_requests=len(urls),
+                                          domain_id=i,
+                                          no_sub_domains=get_no_sub_domains(domain_name),
+                                          domain_length=len(idna.decode(domain_name)),
+                                          ))
+                    i += 1
 
     return domains
 
