@@ -2,7 +2,7 @@ import numpy as np
 from mysql_connection import select_domains, update_score
 import time
 
-from settings import CRITERIA_WEIGHT, CRITERIA_TYPE, CRITERIA_LIST, COMPARISON_MATRIX, CRITERIA_INDEX, RI
+from settings import CRITERIA_TYPE, CRITERIA_LIST, COMPARISON_MATRIX, CRITERIA_INDEX, RI
 
 
 def get_criteria_matrix():

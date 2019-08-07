@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     configure_logging()
     # domains = select_not_crawled_domains()
-    domains = select_domain_objects(start_id=1, end_id=20, contain_crawled_urls=False)
+    domains = select_domain_objects(contain_crawled_urls=False)
     domains.reverse()
     print("Start crawling")
     crawl()
